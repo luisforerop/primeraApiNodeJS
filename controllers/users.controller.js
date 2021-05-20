@@ -1,5 +1,6 @@
 const uuid = require('uuid'); // Librería para generar identificadores únicos
 const crypto = require('../crypto.js'); // Importamos nuestra función de crypto
+const garage = require('../controllers/garage.controller')
 
 // BASES DE DATOS EFÍMERAS:
 const usersDatabase = {};
@@ -50,11 +51,14 @@ const registerUsers = (userName, password , /*done*/) => {
     // Generamos un id único usando uuid.v4
     // Mi implementación
     crypto.hashPassword(password, (err, hashPassword) => {
-        usersDatabase[uuid.v4()] = {
+        let userId = uuid.v4();
+        garage.createGarage(userName);
+        usersDatabase[userId] = {
             'userName': userName,
             // Usando el script de crypto almacenamos la constraseña hasheada
             'password': hashPassword
         }
+
         //done(usersDatabase);
     });
 }; 
@@ -67,6 +71,7 @@ const registerUserSync = (userName, password) => {
         return 'userExist'
     } else {
         userId = uuid.v4();
+        garage.createGarage(userId); // Creamos un garage sin contenido
         usersDatabase[userId] = {
             'userName': userName,
             'password': crypto.hashPasswordSync(password)
@@ -88,9 +93,9 @@ const checkUsersCredentials = (user, password, done /*función callback que viene
 exports.registerUsers = registerUsers;
 exports.checkUsersCredentials = checkUsersCredentials;
 exports.registerUserSync = registerUserSync;
-//exports.consultUserId = consultUserId;
+exports.consultUserId = consultUserId;
 exports.dbConsult = dbConsult;
-//exports.userExist = userExist;
+exports.userExist = userExist;
 
 // TESTS
 // registerUsers('luis_forerop', 'hola mundo', () => console.log(usersDatabase))

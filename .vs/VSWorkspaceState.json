@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\controllers",
+    "\\routers",
     "\\test"
   ],
-  "SelectedNode": "\\app.js",
+  "SelectedNode": "\\test\\auth-test.test.js",
   "PreviewInSolutionExplorer": false
 }

@@ -14,24 +14,15 @@ describe('Suite de pruebas auth', () => {
 	// 401: el usuario no está registrado
 	// Generamos este error cuando el usuario no tiene la llamada puesta
 
-	testCredential = { user: 'luis_forerop', password: 'hola mundo' }
-	testFakeCredential = { user: 'luis_forerop', password: 'hola mundo no es la clave' }
-
-	it('request to team should return 401 when no jwt token available', (done) => {
-		chai.request(app)
-			.get('/team')
-			.end((err, res) => {
-				chai.assert.equal(res.statusCode, 401);
-				done();
-			});
-	});
-
-
+	testCredential = { user: 'luis_forerop', password: 'hola mundo 123' }
+	testFakeCredential = { user: 'luis_forerop', password: 'hola mundo 321 no es la clave' }
 
 	it('should return 400 when no data is provided', (done) => {
 		chai.request(app)
-			.post('/login')
+			.post('/auth/login')
 			.end((err, res) => {
+
+				console.log(`Este es res: ${res}`);
 				chai.assert.equal(res.statusCode, 400);
 				done();
 			});
@@ -41,7 +32,7 @@ describe('Suite de pruebas auth', () => {
 	it('should return 400 when no user or password is provided', (done) => {
 		console.log('hacemos la petición a login enviando solo usuario');
 		chai.request(app)
-			.post('/login')
+			.post('/auth/login')
 			.set('Content-Type', 'application/json')
 			.send({nombre: 'pepe'})
 			.end((err, res) => {
@@ -68,7 +59,7 @@ describe('Suite de pruebas auth', () => {
 
 	it('should return 401 when password is wrong', (done) => {
 		chai.request(app)
-			.post('/login')
+			.post('/auth/login')
 			.set('Content-Type', 'application/json') // Enviamos por header el tipo de contenido que va a recibir
 			.send(testFakeCredential) // Enviamos la información del usuario por body
 			.end((err, res) => {
@@ -80,7 +71,7 @@ describe('Suite de pruebas auth', () => {
 
 	it('should return 200 and token for succesful login', (done) => {
 		chai.request(app)
-			.post('/login')
+			.post('/auth/login')
 			.set('Content-Type', 'application/json') // Enviamos por header el tipo de contenido que va a recibir
 			.send(testCredential) // Enviamos la información del usuario por body
 			.end((err, res) => {
@@ -97,7 +88,7 @@ describe('Suite de pruebas auth', () => {
 	it('should return 200 when jwt is valid', (done) => {
 		chai.request(app)
 			// Primero corremos un test para loguear un usuario
-			.post('/login')
+			.post('/auth/login')
 			.set('content-type', 'application/json') // Enviamos por header el tipo de contenido que va a recibir
 			.send(testCredential) // Enviamos la información del usuario por body
 			// Tan pronto como terminamos de hacer el login, podemos hacer un request
@@ -108,7 +99,7 @@ describe('Suite de pruebas auth', () => {
 				//console.log('Este es el token ' + res.body.token);
 				// Hacemos nuestra request
 				chai.request(app)
-					.get('/team')
+					.get('/garage')
 					.set('Authorization', `JWT ${res.body.token}`) // Enviamos el token en el header .set('/Authorization', 'JWT token')
 					.end((err, res) => {
 						chai.assert.equal(res.statusCode, 200); // Si el token es válido, devolvemos 200

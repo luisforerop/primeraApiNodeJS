@@ -4,8 +4,11 @@ const router = express.Router();
 const passport = require('passport');
 // Importamos nuestro código de auth js y llamamos a la función passport pasandole el objeto de passport:
 require('../auth')(passport); // Activamos passport
+
+
+
+// MÓDULOS
 const garageController = require('../controllers/garage.controller');
-const userController = require('../controllers/users.controller');
 
 
 // En lugar de usar el /team, usamos solo / porque ya está en el enrutador de teams
@@ -17,12 +20,13 @@ router.route('/')
 
             if (user) {
                 let garage = garageController.getGarage(user)
+                console.log('este es garage desde router', garage)
                 return res.status(200).json({user, garage})
             } else {
                 return res.status(400).send('Sin datos')
             }
-            console.log(req.body.user, 'El nombre de usuario en get garage por req')
-            return res.status(200).json({prueba: true})
+            // console.log(req.body.user, 'El nombre de usuario en get garage por req')
+            // return res.status(200).json({prueba: true})
             
         })
     .put((req, res) => {

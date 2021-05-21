@@ -21,6 +21,8 @@ const usersDatabase = {};
 const dbConsult = () => usersDatabase;
 
 const consultUserId = (userName) => {
+    console.log('este es user name en user controller', userName)
+    console.log('este es uderDb', usersDatabase);
     for (let userId in usersDatabase) {
         match = usersDatabase[userId]['userName'] == userName;
         if (match) {
@@ -70,7 +72,8 @@ const registerUserSync = (userName, password) => {
     if (exist) {
         return 'userExist'
     } else {
-        userId = uuid.v4();
+        let userId = uuid.v4();
+        console.log('este es el user id de uuid.v4', userId)
         garage.createGarage(userId); // Creamos un garage sin contenido
         usersDatabase[userId] = {
             'userName': userName,

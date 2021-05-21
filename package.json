@@ -9,6 +9,7 @@
   "author": "luis_forerop",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
     "debug": "^4.3.1",

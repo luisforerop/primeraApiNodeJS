@@ -3,16 +3,9 @@ const chaiHTTP = require('chai-http');
 
 chai.use(chaiHTTP);
 
-const app = require('../app').app;
+const app = require('../../app').app;
 
 describe('Suite de pruebas auth', () => {
-	// 403: el servidor entiende la petición pero el usuario no tiene autorización 
-	/*it('should return 403'), (done) => {
-
-	};*/
-
-	// 401: el usuario no está registrado
-	// Generamos este error cuando el usuario no tiene la llamada puesta
 
 	testCredential = { user: 'luis_forerop', password: 'hola mundo 123' }
 	testFakeCredential = { user: 'luis_forerop', password: 'hola mundo 321 no es la clave' }
@@ -21,8 +14,6 @@ describe('Suite de pruebas auth', () => {
 		chai.request(app)
 			.post('/auth/login')
 			.end((err, res) => {
-
-				console.log(`Este es res: ${res}`);
 				chai.assert.equal(res.statusCode, 400);
 				done();
 			});
@@ -44,7 +35,7 @@ describe('Suite de pruebas auth', () => {
 	// TEST PARA SIGN UP
 	it('should return 200 when user signup', (done) => {
 		chai.request(app)
-			.post('/signUp')
+			.post('/auth/signUp')
 			.set('Content-Type', 'application/json')
 			.send(testCredential)
 			.end((err, res) => {
@@ -97,7 +88,6 @@ describe('Suite de pruebas auth', () => {
 				// Evaluamos la información que estamos recibiendo
 				//console.log('Este es el código ' + res.statusCode);
 				//console.log('Este es el token ' + res.body.token);
-				// Hacemos nuestra request
 				chai.request(app)
 					.get('/garage')
 					.set('Authorization', `JWT ${res.body.token}`) // Enviamos el token en el header .set('/Authorization', 'JWT token')

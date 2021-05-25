@@ -5,7 +5,7 @@ const chaiHTTP = require('chai-http');
 chai.use(chaiHTTP);
 
 // Importamos el objeto app. Con '..' regresamos un directorio
-const app = require('../app').app;
+const app = require('../../app').app;
 
 describe('Test de integración suite de prueba e2e', () => {
 	it('should return hello world', (done) => {

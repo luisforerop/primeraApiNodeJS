@@ -1,28 +1,14 @@
 const uuid = require('uuid'); // Librería para generar identificadores únicos
-const crypto = require('../crypto.js'); // Importamos nuestra función de crypto
-const garage = require('../controllers/garage.controller')
+const crypto = require('../tools/crypto'); // Importamos nuestra función de crypto
+const garage = require('../garage/garage.controller')
 
-// BASES DE DATOS EFÍMERAS:
 const usersDatabase = {};
-
-/*
- La estructura de nuestra base de datos efímera es:
- {
-    identificador: {
-        'password': contraseñaEncriptada,
-        'salt' : componenteNecesarioParaCriptografiaDeContraseñas,
-        'userName' : nombreDelUsuario
-    }
- }
- */
-
-// Users id-> contraseñas cifradas para validar las credenciales.
 
 const dbConsult = () => usersDatabase;
 
 const consultUserId = (userName) => {
-    console.log('este es user name en user controller', userName)
-    console.log('este es uderDb', usersDatabase);
+    // console.log('este es user name en user controller', userName)
+    // console.log('este es uderDb', usersDatabase);
     for (let userId in usersDatabase) {
         match = usersDatabase[userId]['userName'] == userName;
         if (match) {
@@ -54,7 +40,7 @@ const registerUsers = (userName, password , /*done*/) => {
     // Mi implementación
     crypto.hashPassword(password, (err, hashPassword) => {
         let userId = uuid.v4();
-        garage.createGarage(userName);
+        garage.createGarage(userId);
         usersDatabase[userId] = {
             'userName': userName,
             // Usando el script de crypto almacenamos la constraseña hasheada
@@ -73,7 +59,6 @@ const registerUserSync = (userName, password) => {
         return 'userExist'
     } else {
         let userId = uuid.v4();
-        console.log('este es el user id de uuid.v4', userId)
         garage.createGarage(userId); // Creamos un garage sin contenido
         usersDatabase[userId] = {
             'userName': userName,
@@ -90,27 +75,9 @@ const checkUsersCredentials = (user, password, done /*función callback que viene
     crypto.comparePassword(password, userDB.password, done); // Done es una función callback que enviamos al crypto y equivale al done de los parámetros
 };
 
-
-
-
 exports.registerUsers = registerUsers;
 exports.checkUsersCredentials = checkUsersCredentials;
 exports.registerUserSync = registerUserSync;
 exports.consultUserId = consultUserId;
 exports.dbConsult = dbConsult;
 exports.userExist = userExist;
-
-// TESTS
-// registerUsers('luis_forerop', 'hola mundo', () => console.log(usersDatabase))
-/*
-registerUserSync('luis_forerop', 'hola mundo');
-registerUserSync('fede', 'dfsdf');
-registerUserSync('fede', 'dfsdf');
-registerUserSync('fede2', 'dfsdf');
-registerUserSync('fede2', 'dfsdf');
-registerUserSync('fede3', 'dfsdf');
-registerUserSync('fede3', 'dfsdf');
-registerUserSync('fede', 'dfsdf');
-console.log(usersDatabase);
-//console.log(consultUserId('luis_forerop'));
-*/

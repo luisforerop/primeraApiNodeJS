@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken'); // Para generar tokens
 const Joi = require('joi'); // Validación de datos
 const debug = require('debug')('auth:debug'); // Impresión de mensajes en modo debug
 // Módulos
-const userController = require('../controllers/users.controller');
+const userController = require('../auth/users.controller');
 
 
 // VALIDACIONES CON JOI = SCHEMA
@@ -64,9 +64,34 @@ router.route('/login')
 
     });
 
-router.route('/prueba')
+router.route('/signUp')
     .get((req, res) => {
-        return res.status(200).send('POs si funciona')
+        return res.status(200).send('hola')
+    })
+    .post((req, res) => {
+        // Validamos si tenemos un nuevo usuario entrante
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({ message: 'missing data, without data' }); // Debemos agregar el .json o de lo contrario parece que la respuesta es incompleta
+        } else if (!req.body.user || !req.body.password) {
+            return res.status(400).json({ message: 'no user or password providen' });
+        }
+
+        // VARIABLES DE TRABAJO
+        username = req.body.user;
+        password = req.body.password;
+        debug(username, password);
+
+        // CREAMOS EL USUARIO
+        userIdTest = userController.registerUserSync(username, password);
+        if (userIdTest == 'userExist') {
+            return res.status(409).json({
+                message: 'The username already exist'
+            })
+        } else {
+            return res.status(200).json({
+                message: 'succesful signUp'
+            })
+        }
     });
 
 exports.router = router;

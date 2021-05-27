@@ -1,5 +1,4 @@
 const garageDB = {}
-const userController = require('../auth/users.controller');
 const axios = require('axios').default;
 
 let urlApiCar = 'http://localhost:5001/cars'
@@ -23,17 +22,15 @@ const getDataCar = (carName, addCar) => {
 
 };
 
-const getUserId = (user) => userController.consultUserId(user);
-
 const createGarage = (userId) => {
     // userId = getUserId(user);
     garageDB[userId] = []
     // console.log(garageDB)
 };
 
-const newCar = (user, cars) => { // Si quisieramos recibir múltiples argumentos, podemos usar ... Pero al implementarlo recibimos un array
+const newCar = (userId, cars) => { // Si quisieramos recibir múltiples argumentos, podemos usar ... Pero al implementarlo recibimos un array
     // console.log(cars)
-    let userId = getUserId(user);
+    // let userId = getUserId(user);
     console.log('este es el userid2 desde new car', userId);
     console.log('entramos a new car')
     for (let car of cars) {
@@ -46,8 +43,8 @@ const newCar = (user, cars) => { // Si quisieramos recibir múltiples argumentos,
     }
 };
 
-const deleteCar = (user, car) => {
-    let userId = getUserId(user);
+const deleteCar = (user, userId, car) => {
+    //let userId = getUserId(user);
     for (let id in garageDB[userId]) {
         let nameCar = garageDB[userId][id]['name'];
         if (nameCar == car) {
@@ -59,7 +56,7 @@ const deleteCar = (user, car) => {
 }
 
 
-const getGarage = (user) => garageDB[getUserId(user)];
+const getGarage = (userId) => garageDB[userId];
 const allGarage = () => garageDB;
 
 exports.allGarage = allGarage;

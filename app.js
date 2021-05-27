@@ -8,8 +8,8 @@ const middleware = require('./middleware'); // MIDDLEWARES
 // MÓDULOS PARA USAR
 const userController = require('./auth/users.controller'); // Importamos nuestro módilo de controlador de usuario
 // RUTAS
-const authRoutes = require('./auth/auth.http').router;
-const garageRoutes = require('./garage/garage.http').router;
+const authRoutes = require('./auth/auth.router').router;
+const garageRoutes = require('./garage/garage.router').router;
 // MIDDLEWARE
 middleware.setupMiddleware(app); // Llamamos a setupMiddleware y dejamos que se encargue del resto
 

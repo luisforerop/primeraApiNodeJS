@@ -29,6 +29,7 @@ describe('Suite de pruebas para garage', () => {
 			.send(testCredential) // Enviamos la información del usuario por body
 			.end((err, res) => {
 				tokenLogin = res.body.token
+				newUserCars['userId'] = res.body.userId;
 				chai.request(app)
 					.post('/garage')
 					.set('Authorization', `JWT ${tokenLogin	}`, 'Content-Type', 'application/json')
@@ -51,7 +52,7 @@ describe('Suite de pruebas para garage', () => {
 				chai.request(app)
 					.get('/garage')
 					.set('Authorization', `JWT ${res.body.token}`, 'Content-Type', 'application/json')
-					.send({saludo: 'hola'})
+					.send(res.body)
 					.end((err, res) => {
 						//console.log('este es el body desde el test given user', res.body)
 						// Tiene garaje con dos superdeportivos, un audi R8 y un Lamborghini Huracán
@@ -72,7 +73,9 @@ describe('Suite de pruebas para garage', () => {
 			.set('Content-Type', 'application/json') // Enviamos por header el tipo de contenido que va a recibir
 			.send(testCredential) // Enviamos la información del usuario por body
 			.end((err, res) => {
+				// console.log('este es el body desde return 200 delete:', res.body)
 				tokenLogin = res.body.token
+				userCarDelete['userId'] = res.body.userId;
 				chai.request(app)
 					.delete('/garage')
 					.set('Authorization', `JWT ${tokenLogin}`, 'Content-Type', 'application/json')

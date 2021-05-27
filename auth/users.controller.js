@@ -69,8 +69,7 @@ const registerUserSync = (userName, password) => {
 
 }
 
-const checkUsersCredentials = (user, password, done /*función callback que viene de la petición*/) => {
-    let userId = consultUserId(user);
+const checkUsersCredentials = (userId, password, done /*función callback que viene de la petición*/) => {
     let userDB = usersDatabase[userId];
     crypto.comparePassword(password, userDB.password, done); // Done es una función callback que enviamos al crypto y equivale al done de los parámetros
 };

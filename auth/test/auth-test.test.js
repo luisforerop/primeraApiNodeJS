@@ -7,8 +7,8 @@ const app = require('../../app').app;
 
 describe('Suite de pruebas auth', () => {
 
-	testCredential = { user: 'luis_forerop', password: 'hola mundo 123' }
-	testFakeCredential = { user: 'luis_forerop', password: 'hola mundo 321 no es la clave' }
+	let testCredential = { user: 'luis_forerop', password: 'hola mundo 123' }
+	let testFakeCredential = { user: 'luis_forerop', password: 'hola mundo 321 no es la clave' }
 
 	it('should return 400 when no data is provided', (done) => {
 		chai.request(app)
@@ -90,7 +90,8 @@ describe('Suite de pruebas auth', () => {
 				//console.log('Este es el token ' + res.body.token);
 				chai.request(app)
 					.get('/garage')
-					.set('Authorization', `JWT ${res.body.token}`) // Enviamos el token en el header .set('/Authorization', 'JWT token')
+					.set('Authorization', `JWT ${res.body.token}`, 'content-type', 'application/json') // Enviamos el token en el header .set('Authorization', 'JWT token')
+					.send(res.body)
 					.end((err, res) => {
 						chai.assert.equal(res.statusCode, 200); // Si el token es válido, devolvemos 200
 						done();

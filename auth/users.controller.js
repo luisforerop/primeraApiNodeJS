@@ -1,56 +1,82 @@
 const uuid = require('uuid'); // Librería para generar identificadores únicos
 const crypto = require('../tools/crypto'); // Importamos nuestra función de crypto
-const garage = require('../garage/garage.controller')
+const to = require('../tools/promisesManagement').to;
+const garage = require('../garage/garage.controller');
 
 const usersDatabase = {};
 
 const dbConsult = () => usersDatabase;
 
 const consultUserId = (userName) => {
-    // console.log('este es user name en user controller', userName)
-    // console.log('este es uderDb', usersDatabase);
-    for (let userId in usersDatabase) {
-        match = usersDatabase[userId]['userName'] == userName;
-        if (match) {
-            return userId
+    return new Promise((resolve, reject) => {
+        for (let userId in usersDatabase) {
+            match = usersDatabase[userId]['userName'] == userName;
+            if (match) {
+                return resolve(userId);
+            }
         }
-    }
+        reject({message: 'No user with this username'})
+    });
 };
+
 
 const userExist = (userName) => {
-    if (Object.keys(usersDatabase).length === 0) {
-        console.log('estoy vacio');
-        return false
-    }
-
-    for (let userId in usersDatabase) {
-        match = usersDatabase[userId]['userName'] == userName;
-        if (match) {
-            console.log('match');
-            return true
-        } 
-    }
-    return false
+    return new Promise((resolve, reject) => {
+        // EVALUACIÓN PARA DB VACÍA
+        if (Object.keys(usersDatabase).length === 0) {
+            reject({ message: 'empty' })
+        }
+        // BÚSQUEDA Y MATCH
+        for (let userId in usersDatabase) {
+            match = usersDatabase[userId]['userName'] == userName;
+            if (match) {
+                resolve({ message: 'User Exist' }); 
+            }
+        }
+        reject({ message: 'User no exist' })
+    });
 };
 
+/*
+const registerUsers = async (userName, password) => {
+    try {
+        // SI EL USUARIO EXISTE, NO PODEMOS REGISTRARLO NUEVAMENTE
+        exist = await userExist(userName);
+        return 'userExist'
+    } catch (error) {
+        // COMO EL USUARIO NO EXISTE, LO PODEMOS REGISTRAR
+        console.log(`Como estamos ${error.message}`)
+        let hashPassword = await crypto.hashPassword(password);
+        console.log('estamos en register async y esta es la pass', hashPassword)
 
-const registerUsers = (userName, password , /*done*/) => {
-    // Guardar en el diccionario
-    // Generamos un id único usando uuid.v4
-    // Mi implementación
-    crypto.hashPassword(password, (err, hashPassword) => {
         let userId = uuid.v4();
         garage.createGarage(userId);
         usersDatabase[userId] = {
-            'userName': userName,
-            // Usando el script de crypto almacenamos la constraseña hasheada
+            userName,
             'password': hashPassword
         }
+        return userId
+    }
 
-        //done(usersDatabase);
+}; */
+
+const registerUsers =  (userName, password) => {
+    return new Promise(async(resolve, reject) => {
+        let [noExist, exist] = await to(userExist(userName));
+        if (exist) {
+            return resolve('userExist');
+        }
+        // SI EL USUARIO NO EXISTE PODEMOS CREAR UNO NUEVO
+        let hashPassword = await crypto.hashPassword(password);
+        let userId = uuid.v4();
+        await garage.createGarage(userId);
+        usersDatabase[userId] = {
+            userName,
+            'password': hashPassword
+        }
+        return resolve(userId);
     });
-}; 
-
+};
 
 const registerUserSync = (userName, password) => {
     // Revisamos si hay una existencia
@@ -69,9 +95,10 @@ const registerUserSync = (userName, password) => {
 
 }
 
-const checkUsersCredentials = (userId, password, done /*función callback que viene de la petición*/) => {
+const checkUsersCredentials = async (userId, password) => {
     let userDB = usersDatabase[userId];
-    crypto.comparePassword(password, userDB.password, done); // Done es una función callback que enviamos al crypto y equivale al done de los parámetros
+    let [err, resolve] = await to(crypto.comparePassword(password, userDB.password));
+    return resolve
 };
 
 exports.registerUsers = registerUsers;
@@ -79,4 +106,3 @@ exports.checkUsersCredentials = checkUsersCredentials;
 exports.registerUserSync = registerUserSync;
 exports.consultUserId = consultUserId;
 exports.dbConsult = dbConsult;
-exports.userExist = userExist;

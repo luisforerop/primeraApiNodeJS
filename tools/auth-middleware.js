@@ -25,7 +25,7 @@ const init = () => {
 
 // Función para ejecutar el middleware de autentificación en los casos deseados (con excepción a ciertas rutas)
 const protectWithJwt = (req, res, next) => {
-    if (req.path == '/' || req.path == '/auth/login' || req.path == '/dbconsult' || req.path == '/auth/signUp') {
+    if (req.path == '/' || req.path == '/auth/login' || req.path == '/dbconsult' || req.path == '/auth/signUp' || req.path == '/garage/dbcars') {
         return next();
     }
     else {

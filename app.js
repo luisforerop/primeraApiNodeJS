@@ -2,6 +2,7 @@
 const express = require('express'); // Creamos el objeto express
 const app = express(); // Inicializamos un app con el constructor de express
 const port = 3000 // Definimos el puerto para todas nuestras operaciones
+require('./database');
 
 const middleware = require('./middleware'); // MIDDLEWARES
 

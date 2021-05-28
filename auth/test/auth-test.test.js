@@ -9,6 +9,7 @@ describe('Suite de pruebas auth', () => {
 
 	let testCredential = { user: 'luis_forerop', password: 'hola mundo 123' }
 	let testFakeCredential = { user: 'luis_forerop', password: 'hola mundo 321 no es la clave' }
+	let testNoUserExist = { user: 'Pepe', password: 'hola mundo 321 no es la clave' }
 
 	it('should return 400 when no data is provided', (done) => {
 		chai.request(app)
@@ -33,16 +34,25 @@ describe('Suite de pruebas auth', () => {
 	})
 	
 	// TEST PARA SIGN UP
-	it('should return 200 when user signup', (done) => {
+	it('should return 200 when user signup and 401 if user exist', (done) => {
 		chai.request(app)
 			.post('/auth/signUp')
 			.set('Content-Type', 'application/json')
 			.send(testCredential)
 			.end((err, res) => {
 				chai.assert.equal(res.statusCode, 200);
-				done();
+				console.log('Iniciamos test para user exist')
+				chai.request(app)
+					.post('/auth/signUp')
+					.set('Content-Type', 'application/json')
+					.send(testCredential)
+					.end((err, res) => {
+						console.log('este esl body en user exist', res.body)
+						chai.assert.equal(res.statusCode, 409);
+						done();
+					})
             })
-    })
+	})
 
 	
 	// TESTS PARA LOGIN
@@ -54,11 +64,23 @@ describe('Suite de pruebas auth', () => {
 			.set('Content-Type', 'application/json') // Enviamos por header el tipo de contenido que va a recibir
 			.send(testFakeCredential) // Enviamos la información del usuario por body
 			.end((err, res) => {
+				console.log('estas son las credenciales falsas', testFakeCredential)
 				chai.assert.equal(res.statusCode, 401);
 				done();
 			});
 	});	
 
+	it('should return 401 when user no exist', (done) => {
+		chai.request(app)
+			.post('/auth/login')
+			.set('Content-Type', 'application/json') // Enviamos por header el tipo de contenido que va a recibir
+			.send(testNoUserExist) // Enviamos la información del usuario por body
+			.end((err, res) => {
+				console.log('Este es el test y las credenciales son:', testNoUserExist)
+				chai.assert.equal(res.statusCode, 401);
+				done();
+			});
+	});	
 
 	it('should return 200 and token for succesful login', (done) => {
 		chai.request(app)

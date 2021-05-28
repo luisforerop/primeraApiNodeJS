@@ -1,62 +1,74 @@
 const garageDB = {}
+// MÓDULOS
+const to = require('../tools/promisesManagement').to;
+const mongoose = require('mongoose');
 const axios = require('axios').default;
+
+// MODELO DB
+const schemaGarage = mongoose.Schema({
+    userId: String,
+    garage: []
+});
+
+const garageModel = mongoose.model('garage', schemaGarage);
+
+/*
+const hyperCar= mongoose.model('hyperCar', { name: String });
+const ferrari = new hyperCar({ name: 'Ferrari La Ferrari' });
+ferrari.save().then(() => console.log('Nuevo carro guardado'));*/
+
 
 let urlApiCar = 'http://localhost:5001/cars'
 
-const getDataCar = (carName, addCar) => {
+const getDataCar = async (carName, addCar) => {
     url = `${urlApiCar}/byKeyword/${carName}`
-    axios.get(url)
-        .then(function (response) {
-            return addCar(response.data.cars[0]); // Como es una promise, usamos un callback que agrega la info
-        })
-        .catch(function (error) {
-            // VERIFICAR CÓMO GESTIONAR EL ERROR CUANDO EL SERVIDOR NO ESTÁ FUNCIONANDO
-            // Probablemente en la vida real/producción no utilizariamos esta metodología. 
-            // En lugar de eso, haríamos que el frontend consultara la api de car para recibir info de los 
-            // Vehículos disponibles, y cuando el usuario los elija, nos devuelve toda la información.
-            console.log('la hemos cagao', error);
-        })
-        .then(function () {
-            // always executed
-        });
-
+    // HACEMOS PETICIÓN Y GESTIONAMOS PROMESA CON AWAIT
+    let [err, response] = await to( axios.get(url) );
+    if (response || !err) {
+        return response.data.cars[0]
+    }
+    else {
+        console.log('Error:', err);
+        return err
+    }
 };
 
 const createGarage = (userId) => {
-    // userId = getUserId(user);
-    garageDB[userId] = []
-    // console.log(garageDB)
+    return new Promise((resolve, reject) => {
+        return resolve(garageDB[userId] = [])
+    })
 };
 
 const newCar = (userId, cars) => { // Si quisieramos recibir múltiples argumentos, podemos usar ... Pero al implementarlo recibimos un array
-    // console.log(cars)
-    // let userId = getUserId(user);
-    console.log('este es el userid2 desde new car', userId);
-    console.log('entramos a new car')
-    for (let car of cars) {
-        console.log(car)
-        getDataCar(car, (carInfo) => { // Esta es la implementación del callback para agregar la info al garage
+    return new Promise(async (resolve, reject) => {
+        for (let car of cars) {
+            let carInfo = await getDataCar(car);
             garageDB[userId].push(carInfo)
-            // console.log('Car info es ', carInfo)
-        })
-        // console.log('terminamos car', car)
-    }
+        }
+        resolve({message: 'Cars add'})
+    });
 };
 
 const deleteCar = (user, userId, car) => {
-    //let userId = getUserId(user);
-    for (let id in garageDB[userId]) {
-        let nameCar = garageDB[userId][id]['name'];
-        if (nameCar == car) {
-            console.log(garageDB[userId][id])
-            let deleteCarResult = garageDB[userId].splice(id,1);
-            return { user, car: deleteCarResult[0].name }
+    return new Promise((resolve, reject) => {
+        for (let id in garageDB[userId]) {
+            let nameCar = garageDB[userId][id]['name'];
+            if (nameCar == car) {
+                let deleteCarResult = garageDB[userId].splice(id, 1);
+                // Para confirmar devolvemos el usuario el vehículo eliminado
+                return resolve({ user, car: deleteCarResult[0].name }); 
+            }
         }
-    }
+    });
 }
 
 
-const getGarage = (userId) => garageDB[userId];
+const getGarage = userId => {
+    return new Promise((resolve, reject) => {
+        return resolve(garageDB[userId]);
+    })
+};
+
 const allGarage = () => garageDB;
 
 exports.allGarage = allGarage;

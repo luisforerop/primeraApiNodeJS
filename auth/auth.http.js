@@ -4,7 +4,7 @@ const Joi = require('joi'); // Validación de datos
 const debug = require('debug')('auth:debug'); // Impresión de mensajes en modo debug
 // Módulos
 const userController = require('../auth/users.controller');
-
+const to = require('../tools/promisesManagement').to;
 
 // VALIDACIONES CON JOI = SCHEMA
 const schema = Joi.object({
@@ -22,8 +22,8 @@ const schema = Joi.object({
 
 });
 
-const login = (req, res) => {
-    // IMPLEMENTAR LA VALIDACIÓN CON JOI Y SCHEMA
+const login = async (req, res) => {
+
     // Variables a validar
     toValidate = { user: req.body.user, password: req.body.password };
     // Validación
@@ -42,14 +42,16 @@ const login = (req, res) => {
     debug('Pasamos el if error')
 
     // Si son validas generamos un jwt y lo devolvemos
-    let userId = userController.consultUserId(user)
-    userController.checkUsersCredentials(userId, password, (err, result, done) => {
+    try {
+        // SIEMPRE TRABAJAMOS CON ID, ASÍ QUE LO RECUPERAMOS
+        let userId = await userController.consultUserId(user)
+        let [err, result] = await to(userController.checkUsersCredentials(userId, password))
+        
         debug(`El error es ${err}`);
         debug(`El resultado es ${result}`);
         if (err || !result) {
             return res.status(401).json({ message: 'Invalid credentials' });
         } else {
-            // Las credenciales con válidas porque hay un usuario que existe y la contraseña hizo match
             // Creamos un token  
             const token = jwt.sign({ user: user }, 'NuestraClaveSecreta');
             return res.status(200).json({
@@ -57,10 +59,14 @@ const login = (req, res) => {
                 userId
             })
         }
-    });
+
+    } catch (error) {
+        return res.status(401).json(error)
+    }
+    
 }
 
-const signup = (req, res) => {
+const signup = async (req, res) => {
     // Validamos si tenemos un nuevo usuario entrante
     if (Object.keys(req.body).length === 0) {
         return res.status(400).json({ message: 'missing data, without data' }); // Debemos agregar el .json o de lo contrario parece que la respuesta es incompleta
@@ -69,12 +75,12 @@ const signup = (req, res) => {
     }
 
     // VARIABLES DE TRABAJO
-    let username = req.body.user;
+    let user = req.body.user;
     let password = req.body.password;
-    debug(username, password);
+    debug(user, password);
 
     // CREAMOS EL USUARIO
-    let userIdTest = userController.registerUserSync(username, password);
+    let userIdTest = await userController.registerUsers(user, password);
     if (userIdTest == 'userExist') {
         return res.status(409).json({
             message: 'The username already exist'
